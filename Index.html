@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome | UltimateWebandIllustrations</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDc3MWtsZWdxZmQyZ2J3MXd1d3Z5aTY5YjFwNndwNGc4dHd0eG5wOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h4ktpZmIQMP9Rlss0m/giphy.gif") no-repeat center center/cover;
+      color: white;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    h1 {
+      font-size: 3rem;
+      letter-spacing: 2px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-out {
+      animation: fadeOut 1.5s forwards;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="overlay"></div>
+
+  <div class="content" id="welcomeText">
+    <h1>Welcome to UltimateWebandIllustrations</h1>
+  </div>
+
+  <script>
+    // Wait 4 seconds, then fade out and redirect
+    setTimeout(() => {
+      document.getElementById("welcomeText").classList.add("fade-out");
+
+      setTimeout(() => {
+        window.location.href = "home.html"; // Change to your homepage file
+      }, 1500);
+
+    }, 4000);
+  </script>
+
+</body>
+</html>

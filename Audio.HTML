@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DedSec ctOS Beat Reactive Glitch</title>
+
+<style>
+  body {
+    margin: 0;
+    background: black;
+    color: #00ff88;
+    font-family: monospace;
+    overflow: hidden;
+  }
+
+  header {
+    text-align: center;
+    padding: 20px;
+    font-size: 22px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px #00ff88;
+  }
+
+  /* ===== VISUALIZER ===== */
+  .visualizer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 40vh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 6px;
+    pointer-events: none;
+  }
+
+  .bar {
+    width: 8px;
+    background: linear-gradient(180deg, #00ffcc, #00ff88);
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 0 15px #00ff88;
+    transition: height 0.05s linear;
+  }
+
+  /* ===== BLUME GLITCH ===== */
+  .glitch {
+    position: fixed;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(255,0,0,0.15),
+        rgba(255,0,0,0.15) 1px,
+        transparent 2px,
+        transparent 4px
+      );
+    mix-blend-mode: screen;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .rgb {
+    position: fixed;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(255,0,0,0.25), transparent),
+      linear-gradient(90deg, transparent, rgba(0,255,255,0.25));
+    mix-blend-mode: screen;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .shake {
+    animation: shake 0.15s linear;
+  }
+
+  @keyframes shake {
+    0% { transform: translate(0,0); }
+    25% { transform: translate(-6px,2px); }
+    50% { transform: translate(6px,-2px); }
+    75% { transform: translate(-4px,2px); }
+    100% { transform: translate(0,0); }
+  }
+</style>
+</head>
+<body>
+
+<header>ctOS SECURITY BREACH — DEDSEC ACTIVE</header>
+
+<div class="glitch" id="glitch"></div>
+<div class="rgb" id="rgb"></div>
+<div class="visualizer" id="visualizer"></div>
+
+<audio id="audio" autoplay playsinline crossorigin="anonymous"></audio>
+
+<script>
+/* ===== PLAYLIST ===== */
+const playlist = [
+  "audio/track1.mp3",
+  "Let 'Em Know - T.I.mp3",
+  "I'm a Watch Dog - NerdOut.mp3",
+  "Hip Hop My Friend - Watch Dogs Soundtrack.mp3",
+  "Let the Rhythm Just.mp3",
+  "Oliver Heldens - Good Life (Extended Mix).mp3"
+];
+
+let trackIndex = 0;
+
+/* ===== AUDIO SETUP ===== */
+const audio = document.getElementById("audio");
+audio.src = playlist[trackIndex];
+audio.volume = 0.6;
+audio.loop = false;
+
+/* ===== AUDIO CONTEXT ===== */
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const ctx = new AudioContext();
+const source = ctx.createMediaElementSource(audio);
+const analyser = ctx.createAnalyser();
+
+analyser.fftSize = 256;
+const data = new Uint8Array(analyser.frequencyBinCount);
+
+source.connect(analyser);
+analyser.connect(ctx.destination);
+
+/* ===== FORCE AUTOPLAY ATTEMPT ===== */
+window.addEventListener("load", async () => {
+  try {
+    await ctx.resume();
+    await audio.play();
+  } catch (e) {
+    console.warn("Autoplay blocked by browser.");
+  }
+});
+
+/* ===== VISUALIZER ===== */
+const visualizer = document.getElementById("visualizer");
+const bars = [];
+const BAR_COUNT = 50;
+
+for (let i = 0; i < BAR_COUNT; i++) {
+  const bar = document.createElement("div");
+  bar.className = "bar";
+  visualizer.appendChild(bar);
+  bars.push(bar);
+}
+
+const glitch = document.getElementById("glitch");
+const rgb = document.getElementById("rgb");
+
+let lastBass = 0;
+
+/* ===== ANIMATION LOOP ===== */
+function animate() {
+  requestAnimationFrame(animate);
+  analyser.getByteFrequencyData(data);
+
+  let bass = 0;
+
+  bars.forEach((bar, i) => {
+    const value = data[i];
+    bar.style.height = `${value * 1.5}px`;
+    bass += value;
+  });
+
+  bass /= BAR_COUNT;
+
+  if (bass > 180 && bass > lastBass + 35) {
+    triggerGlitch();
+  }
+
+  lastBass = bass;
+}
+
+animate();
+
+/* ===== GLITCH EFFECT ===== */
+function triggerGlitch() {
+  glitch.style.opacity = "1";
+  rgb.style.opacity = "1";
+  document.body.classList.add("shake");
+
+  setTimeout(() => {
+    glitch.style.opacity = "0";
+    rgb.style.opacity = "0";
+    document.body.classList.remove("shake");
+  }, 120);
+}
+
+/* ===== AUTO NEXT TRACK ===== */
+audio.addEventListener("ended", () => {
+  trackIndex = (trackIndex + 1) % playlist.length;
+  audio.src = playlist[trackIndex];
+  audio.play();
+});
+</script>
+
+</body>
+</html>

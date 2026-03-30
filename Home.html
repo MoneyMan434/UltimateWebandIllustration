@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<title>Ultimate Web & Illustration // DedSec</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:"Courier New",monospace;
+background:black;
+color:white;
+overflow-x:hidden;
+text-shadow:0 0 10px rgba(255,255,255,.25);
+}
+
+/* ENTRY OVERLAY */
+#entryOverlay{
+position:fixed;top:0;left:0;width:100%;height:100%;
+background:black;z-index:20000;display:flex;
+align-items:center;justify-content:center;
+}
+#entryOverlay img{
+width:100%;height:100%;object-fit:cover;
+transition:opacity .8s;
+}
+
+/* MATRIX */
+#matrixCanvas{
+position:fixed;top:0;left:0;width:100%;height:100%;
+z-index:-10;opacity:.35;
+}
+
+/* HEADER */
+header{
+position:sticky;top:0;
+background:rgba(0,0,0,.9);
+padding:20px;border-bottom:1px solid white;
+text-align:center;
+}
+
+nav button{
+background:transparent;color:white;
+border:2px solid white;
+padding:10px 16px;margin:6px;
+cursor:pointer;transition:.3s;
+}
+nav button:hover{background:white;color:black}
+
+/* SECTIONS */
+section{padding:80px 20px;text-align:center}
+
+/* PRICING */
+.pricing{
+display:flex;gap:25px;
+justify-content:center;flex-wrap:wrap;
+}
+
+.price-card{
+background:rgba(0,0,0,.85);
+padding:30px;width:300px;
+border:1px solid white;
+transition:.3s;
+}
+.price-card:hover{box-shadow:0 0 20px white}
+
+.qty{
+width:70px;margin:10px;padding:6px;
+background:black;color:white;
+border:1px solid white;text-align:center;
+}
+
+/* BUTTON */
+.pay-btn{
+margin-top:12px;width:100%;
+padding:12px;background:white;
+color:black;font-weight:bold;
+cursor:pointer;transition:.25s;
+}
+.pay-btn:hover{
+box-shadow:0 0 25px white;
+transform:scale(1.05);
+}
+
+/* CONTACT */
+.contact-form{
+max-width:600px;margin:auto;
+background:rgba(0,0,0,.85);
+padding:30px;border:1px solid white;
+}
+
+.contact-form input,
+.contact-form textarea{
+width:100%;padding:12px;margin-bottom:12px;
+background:black;color:white;
+border:1px solid white;
+}
+
+/* GLITCH */
+.glitch-btn{
+width:100%;padding:14px;
+background:white;color:black;
+font-weight:bold;cursor:pointer;
+}
+.glitch-btn:hover{
+animation:glitch .3s infinite;
+}
+@keyframes glitch{
+0%{transform:translate(0)}
+25%{transform:translate(-2px,2px)}
+50%{transform:translate(2px,-2px)}
+100%{transform:translate(0)}
+}
+
+/* POPUP */
+#paymentPopup{
+position:fixed;inset:0;
+background:rgba(0,0,0,.9);
+display:none;align-items:center;
+justify-content:center;z-index:9999;
+}
+
+.paymentBox{
+background:black;border:1px solid white;
+padding:30px;width:350px;text-align:center;
+}
+
+/* GIF */
+#fullScreenGif{
+position:fixed;top:0;left:0;
+width:100vw;height:100vh;
+object-fit:cover;opacity:0;
+z-index:9999;pointer-events:none;
+transition:opacity .6s ease;
+}
+</style>
+</head>
+
+<body>
+
+<div id="entryOverlay"><img id="entryGif"></div>
+<canvas id="matrixCanvas"></canvas>
+<img id="fullScreenGif">
+
+<header>
+<h1>Ultimate Web & Illustration</h1>
+<nav>
+<button onclick="scrollToSection('home')">Home</button>
+<button onclick="scrollToSection('pricing')">Pricing</button>
+<button onclick="scrollToSection('contact')">Contact</button>
+</nav>
+</header>
+
+<section id="home">
+<h2>DedSec Online — ctOS Compromised</h2>
+<p>Professional Website Development & Illustration Services</p>
+</section>
+
+<section id="pricing">
+<h2>Pricing</h2>
+
+<div class="pricing">
+
+<div class="price-card">
+<h3>Single Page Website</h3>
+<p>$35 per page</p>
+<input class="qty" id="qtyPage" type="number" value="1" min="1">
+<p>Total: $<span id="totalPage">35</span></p>
+<button class="pay-btn" onclick="openPayment('Single Page Website')">Pay Now</button>
+</div>
+
+<div class="price-card">
+<h3>Business Website</h3>
+<p>$85 per page</p>
+<input class="qty" id="qtyBiz" type="number" value="1" min="1">
+<p>Total: $<span id="totalBiz">85</span></p>
+<button class="pay-btn" onclick="openPayment('Business Website')">Pay Now</button>
+</div>
+
+</div>
+</section>
+
+<section id="contact">
+<h2>Contact</h2>
+<p><strong>Email:</strong> ultimatewebandillustration@gmail.com</p>
+<p><strong>Phone:</strong> 313-205-0735</p>
+
+<form class="contact-form" id="contactForm">
+<input placeholder="First Name" required>
+<input placeholder="Last Name" required>
+<input placeholder="Subject" required>
+<textarea placeholder="Message" required></textarea>
+<button class="glitch-btn">Send Message</button>
+</form>
+</section>
+
+<footer>
+<p>© 2026 Ultimate Web & Illustration</p>
+</footer>
+
+<div id="paymentPopup">
+<div class="paymentBox">
+<h3 id="paymentTitle"></h3>
+<p>Total: $<span id="paymentAmount"></span></p>
+
+<div id="paymentOptions"></div>
+
+<button onclick="closePayment()">Cancel</button>
+</div>
+</div>
+
+<script>
+
+/* ENTRY ANIMATION */
+const entryGif=document.getElementById("entryGif");
+const entryOverlay=document.getElementById("entryOverlay");
+
+window.onload=()=>{
+entryGif.src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdml2eHR3MXI1M3l3bDJrM3l3cW9oYmRyeDdvNG83cXExY3NwZGkxOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l3q2JvztR3AjtBxQs/giphy.gif";
+
+setTimeout(()=>{
+entryGif.src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExc295d3o3dXMzbzRyY3Bybjl0bm16aGQwNDZzOWphNnV2aWw1Zzg2cCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/g5eY6R37JPZa8/giphy.gif";
+},2500);
+
+setTimeout(()=>{
+entryOverlay.style.opacity=0;
+setTimeout(()=>entryOverlay.style.display="none",800);
+},5000);
+}
+
+/* SCROLL */
+function scrollToSection(id){
+document.getElementById(id).scrollIntoView({behavior:"smooth"})
+}
+
+/* PRICE */
+qtyPage.oninput=()=>totalPage.textContent=qtyPage.value*35;
+qtyBiz.oninput=()=>totalBiz.textContent=qtyBiz.value*85;
+
+/* PAYMENT SYSTEM */
+const cashtag="UWAI8";
+
+function openPayment(service){
+
+let total=service.includes("Single")
+? qtyPage.value*35
+: qtyBiz.value*85;
+
+paymentTitle.textContent=service;
+paymentAmount.textContent="$"+total;
+paymentPopup.style.display="flex";
+
+renderPayments(total);
+}
+
+function closePayment(){
+paymentPopup.style.display="none";
+paymentOptions.innerHTML="";
+}
+
+function renderPayments(amount){
+
+paymentOptions.innerHTML="";
+
+/* CASH APP QR */
+let cash=document.createElement("button");
+cash.innerText="Cash App QR Pay";
+cash.onclick=()=>{
+
+let link=`https://cash.app/$${cashtag}/${amount}`;
+let qr=`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(link)}`;
+
+paymentOptions.innerHTML=`
+<p>Scan to Pay</p>
+<img src="${qr}" style="width:200px">
+<button onclick="window.open('${link}','_blank')">Open Cash App</button>
+<button onclick="successPay()">I Paid ✔</button>
+`;
+};
+
+/* APPLE PAY */
+let apple=document.createElement("button");
+apple.innerText=" Apple Pay";
+apple.onclick=()=>{
+
+if(!window.ApplePaySession){
+alert("Apple Pay not supported");
+return;
+}
+
+let session=new ApplePaySession(3,{
+countryCode:"US",
+currencyCode:"USD",
+supportedNetworks:["visa","masterCard","amex","discover"],
+merchantCapabilities:["supports3DS"],
+total:{label:"UWAI",amount:amount.toString()}
+});
+
+session.onpaymentauthorized=()=>{
+session.completePayment(ApplePaySession.STATUS_SUCCESS);
+successPay();
+};
+
+session.begin();
+};
+
+paymentOptions.appendChild(cash);
+paymentOptions.appendChild(apple);
+}
+
+/* SUCCESS */
+function successPay(){
+closePayment();
+playGif("https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExeDd5d3Zvd29mbDM3OHIzamdpNHEydGlhN253Y2tjNmJsMWRyc29tcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RtGogvUvIMrm8YH9gJ/giphy.gif");
+alert("Payment Successful ✔");
+}
+
+/* GIF */
+function playGif(url){
+fullScreenGif.src=url;
+fullScreenGif.style.opacity=1;
+setTimeout(()=>fullScreenGif.style.opacity=0,3500);
+}
+
+/* CONTACT */
+contactForm.onsubmit=e=>{
+e.preventDefault();
+playGif("https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExeDd5d3Zvd29mbDM3OHIzamdpNHEydGlhN253Y2tjNmJsMWRyc29tcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RtGogvUvIMrm8YH9gJ/giphy.gif");
+alert("Message Sent ✔");
+contactForm.reset();
+}
+
+/* MATRIX */
+const canvas=matrixCanvas;
+const ctx=canvas.getContext("2d");
+
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+const letters="01";
+const drops=Array(Math.floor(canvas.width/16)).fill(1);
+
+setInterval(()=>{
+ctx.fillStyle="rgba(0,0,0,.08)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+ctx.fillStyle="#888";
+ctx.font="16px monospace";
+
+drops.forEach((y,i)=>{
+ctx.fillText(letters[Math.random()*2|0],i*16,y*16);
+if(y*16>canvas.height&&Math.random()>0.975)drops[i]=0;
+drops[i]++;
+});
+},33);
+
+</script>
+
+</body>
+</html>
